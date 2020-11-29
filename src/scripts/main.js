@@ -1,20 +1,22 @@
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    const objects = [];
-
-    let offset = {x: 0, y: 0};
-    let zoom = 10;
     const canvas = document.createElement('canvas');
     document.body.appendChild(canvas);
     const ctx = canvas.getContext('2d');
+
+    const grid = new Grid();
+
+    const objects = [grid];
+
+    objects.push(new Movable());
 
     const getSettings = () => {
         return {
             width: window.innerWidth,
             height: window.innerHeight,
-            zoom,
-            offset,
+            zoom: grid.zoom,
+            offset: grid,
             ctx,
             objects
         };
@@ -23,25 +25,17 @@ document.addEventListener("DOMContentLoaded", () => {
     window.onresize = ((c) => () => {
         c.width = window.innerWidth;
         c.height = window.innerHeight;
+        grid.h = c.height;
+        grid.w = c.width;
         display(getSettings());
     })(canvas);
 
+    const moveLoop = new MoveLoop({ canvas, objects});
 
-    const windowMover = new Move({ canvas, zoom, offset});
-
-    objects.push(new BaseObject({}));
+    moveLoop.redraw = () => {
+        display(getSettings());
+    }
 
     window.onresize();
-
-
-    windowMover.offsetChanged = (_offset) => {
-        offset = _offset;
-        display(getSettings());
-    }
-
-    windowMover.zoomChanged = (_zoom) => {
-        zoom = _zoom;
-        display(getSettings());
-    }
 
 });

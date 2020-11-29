@@ -1,66 +1,74 @@
-class Move {
-
+class MoveLoop {
     constructor(config) {
-        const { canvas, zoom, offset }= config;
-        this.mousePressed = false;
-        this.mousePos = null;
-        this.zoom = zoom || 1;
-        this.offset = offset || {x: 0, y: 0};
+        const { canvas, objects }= config;
 
-        this.offsetChanged = null;
-        this.zoomChanged = null;
+        this.objects = objects;
+        this.movedObject = null;
+        this.redraw = null;
 
-        canvas.onmousewheel = this.mouseWheel.bind(this);
         canvas.onmousedown = this.mouseDown.bind(this);
         canvas.onmousemove = this.mouseMove.bind(this);
         canvas.onmouseout = this.mouseUp.bind(this);
         canvas.onmouseup = this.mouseUp.bind(this);
     }
 
-    mouseWheel(event) {
+    mouseDown(event) {
         event.stopPropagation()
-        const delta = (event.deltaY || event.detail) > 0 ? 0.5 : 2;
-        const newZoom = this.zoom * delta;
-        if (newZoom > 0) {
-            this.zoom = newZoom;
-            if (this.zoomChanged) {
-                this.zoomChanged(newZoom);
+        let i = this.objects.length - 1;
+        this.movedObject = null;
+
+        const localPos = this._toLocalPos(event);
+
+        const grid = this.objects[0];
+        const mousePos = {
+            x: localPos.x - grid.x,
+            y: localPos.y - grid.y,
+        };
+
+        while (i >= 0) {
+            if (this.objects[i] && this.objects[i].isActive) {
+                if (this.objects[i].isActive(mousePos)) {
+                    this.movedObject = this.objects[i];
+                    break;
+                }
+            }
+            i--;
+        }
+
+        if (this.movedObject && this.movedObject.mouseDown) {
+            this.movedObject.mouseDown(this._toLocalPos(event));
+            if (this.redraw) {
+                this.redraw()
             }
         }
     }
 
-    mouseDown(event) {
-        event.stopPropagation()
-        this.mousePos = {
-            x: event.pageX,
-            y: event.pageY
-        };
-    }
-
     mouseMove(event) {
         event.stopPropagation()
-        if (this.mousePos) {
-            const dev = {
-                x: this.mousePos.x - event.pageX,
-                y: this.mousePos.y - event.pageY
-            };
-            this.mousePos = {
-                x: event.pageX,
-                y: event.pageY
-            };
-            this.offset = {
-                x: this.offset.x - dev.x,
-                y: this.offset.y - dev.y
-            };
-            if (this.offsetChanged) {
-                this.offsetChanged(this.offset);
+        if (this.movedObject && this.movedObject.mouseMove) {
+            this.movedObject.mouseMove(this._toLocalPos(event));
+            if (this.redraw) {
+                this.redraw()
             }
         }
     }
 
     mouseUp(event) {
         event.stopPropagation()
-        this.mousePos = null;
+        if (this.movedObject && this.movedObject.mouseUp) {
+            this.movedObject.mouseUp(this._toLocalPos(event));
+            if (this.redraw) {
+                this.redraw()
+            }
+        }
+    }
+
+    _toLocalPos(event) {
+        const grid = this.objects[0];
+        return {
+            x: (event.pageX - grid.w / 2) / grid.zoom,
+            y: (event.pageY - grid.h / 2) / grid.zoom
+        };
     }
 
 }
