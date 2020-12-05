@@ -22,7 +22,7 @@ class MoveLoop {
         const grid = this.objects[0];
         const mousePos = {
             x: localPos.x - grid.x,
-            y: localPos.y - grid.y,
+            y: localPos.y - grid.y
         };
 
         while (i >= 0) {

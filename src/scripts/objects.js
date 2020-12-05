@@ -1,18 +1,25 @@
 class BaseObject {
 
     constructor(config) {
-        const { x, y, width, height, color } = (config || {});
+        const { x, y, width, height, color, moveWithGrid } = (config || {});
         this.x = x || 0;
         this.y = y || 0;
         this.w = width || 1;
         this.h = height || 1;
         this.color = color || '#000';
+        this.moveWithGrid = moveWithGrid ?? true;
     }
 
     draw(config) {
         const { ctx, offset, zoom, width, height } = (config || {});
 
-        ctx.rect(this.x * zoom + offset.x * zoom + width / 2, this.y * zoom + offset.y * zoom + height / 2, this.w * zoom, this.h * zoom);
+        /** Если включено движения по сетке, то делаем выравнивание. */
+        const pos = this.moveWithGrid ? Math.floor : (item) => item;
+
+        const x = pos(this.x) * zoom + offset.x * zoom + width / 2;
+        const y = pos(this.y) * zoom + offset.y * zoom + height / 2;
+
+        ctx.rect(x, y, this.w * zoom, this.h * zoom);
         ctx.fillStyle = this.color;
         ctx.fill();
     }
@@ -31,6 +38,16 @@ class Movable extends BaseObject {
             x: point.x,
             y: point.y
         };
+
+        /**
+         * При движении по сетке, по клику на объект смешает по отношению к курсору чтобы он попадал в
+         * ячейку с курсором а не в ячейку с его левым верхним углом.
+         */
+        if (this.moveWithGrid) {
+            this.x += Math.abs(point.x % 1);
+            this.y += Math.abs(point.y % 1);
+        }
+
     }
 
     mouseMove(point) {
@@ -51,6 +68,11 @@ class Movable extends BaseObject {
 
     mouseUp(point) {
         this.mousePos = null;
+        // Когда отпускаем мышь после перемещения, возвращаю прежнюю позицию.
+        if (this.moveWithGrid) {
+            this.x = Math.floor(this.x);
+            this.y = Math.floor(this.y);
+        }
     }
 
     isActive(point) {
@@ -67,6 +89,7 @@ class Grid extends Movable {
         super(config)
         const { zoom, canvas } = (config || {})
         this.zoom = zoom ?? 10;
+        this.moveWithGrid = false;
         if (canvas) {
             canvas.onmousewheel = this.mouseWheel.bind(this);
         }
@@ -99,7 +122,7 @@ class Grid extends Movable {
         event.stopPropagation()
         const delta = (event.deltaY || event.detail) > 0 ? 0.9 : 1.1;
         const newZoom = this.zoom * delta;
-        if (newZoom > 0) {
+        if (newZoom > 1 && newZoom < window.innerWidth) {
             this.zoom = newZoom;
             if (this.zoomChanged) {
                 this.zoomChanged(newZoom);
