@@ -65,8 +65,11 @@ class Grid extends Movable {
 
     constructor(config) {
         super(config)
-        const { zoom } = (config || {})
+        const { zoom, canvas } = (config || {})
         this.zoom = zoom ?? 10;
+        if (canvas) {
+            canvas.onmousewheel = this.mouseWheel.bind(this);
+        }
     }
 
     draw(config) {
@@ -90,6 +93,18 @@ class Grid extends Movable {
 
     isActive() {
         return true;
+    }
+
+    mouseWheel(event) {
+        event.stopPropagation()
+        const delta = (event.deltaY || event.detail) > 0 ? 0.9 : 1.1;
+        const newZoom = this.zoom * delta;
+        if (newZoom > 0) {
+            this.zoom = newZoom;
+            if (this.zoomChanged) {
+                this.zoomChanged(newZoom);
+            }
+        }
     }
 
 }

@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.appendChild(canvas);
     const ctx = canvas.getContext('2d');
 
-    const grid = new Grid();
+    const grid = new Grid({canvas});
 
     const objects = [grid];
 
@@ -35,6 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
     moveLoop.redraw = () => {
         display(getSettings());
     }
+    grid.zoomChanged = moveLoop.redraw;
 
     window.onresize();
 
