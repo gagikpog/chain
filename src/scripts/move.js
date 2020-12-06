@@ -1,29 +1,16 @@
 class MoveLoop {
     constructor(config) {
-        const { canvas, objects }= config;
+        const { objects } = config;
 
         this.objects = objects;
         this.movedObject = null;
         this.redraw = null;
-
-        canvas.onmousedown = this.mouseDown.bind(this);
-        canvas.onmousemove = this.mouseMove.bind(this);
-        canvas.onmouseout = this.mouseUp.bind(this);
-        canvas.onmouseup = this.mouseUp.bind(this);
     }
 
     mouseDown(event) {
-        event.stopPropagation()
         let i = this.objects.length - 1;
         this.movedObject = null;
-
-        const localPos = this._toLocalPos(event);
-
-        const grid = this.objects[0];
-        const mousePos = {
-            x: localPos.x - grid.x,
-            y: localPos.y - grid.y
-        };
+        const mousePos = this.toGlobalPos(event);
 
         while (i >= 0) {
             if (this.objects[i] && this.objects[i].isActive) {
@@ -44,7 +31,6 @@ class MoveLoop {
     }
 
     mouseMove(event) {
-        event.stopPropagation()
         if (this.movedObject && this.movedObject.mouseMove) {
             this.movedObject.mouseMove(this._toLocalPos(event));
             if (this.redraw) {
@@ -54,11 +40,10 @@ class MoveLoop {
     }
 
     mouseUp(event) {
-        event.stopPropagation()
         if (this.movedObject && this.movedObject.mouseUp) {
             this.movedObject.mouseUp(this._toLocalPos(event));
             if (this.redraw) {
-                this.redraw()
+                this.redraw();
             }
         }
     }
@@ -68,6 +53,16 @@ class MoveLoop {
         return {
             x: (event.pageX - grid.w / 2) / grid.zoom,
             y: (event.pageY - grid.h / 2) / grid.zoom
+        };
+    }
+
+    toGlobalPos(event) {
+        const localPos = this._toLocalPos(event);
+
+        const grid = this.objects[0];
+        return {
+            x: localPos.x - grid.x,
+            y: localPos.y - grid.y
         };
     }
 

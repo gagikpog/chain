@@ -19,8 +19,8 @@ class BaseObject {
         const x = pos(this.x) * zoom + offset.x * zoom + width / 2;
         const y = pos(this.y) * zoom + offset.y * zoom + height / 2;
 
-        ctx.rect(x, y, this.w * zoom, this.h * zoom);
-        ctx.fillStyle = this.color;
+        ctx.fillStyle = this.mousePos ? '#444' :  this.color;
+        ctx.fillRect(x, y, this.w * zoom, this.h * zoom);
         ctx.fill();
     }
 }
@@ -73,6 +73,9 @@ class Movable extends BaseObject {
             this.x = Math.floor(this.x);
             this.y = Math.floor(this.y);
         }
+        if(this.updateItemCache) {
+            this.updateItemCache();
+        }
     }
 
     isActive(point) {
@@ -80,5 +83,73 @@ class Movable extends BaseObject {
             this.y <= point.y &&
             this.x + this.w >= point.x &&
             this.y + this.h >= point.y;
+    }
+}
+
+class Slots extends Movable {
+
+    constructor(config) {
+        super(config);
+        this.oldPos = this.getKey();
+        Slots.cacheItems[this.oldPos] = this;
+    }
+
+    updateItemCache() {
+        delete Slots.cacheItems[this.oldPos];
+        this.oldPos = this.getKey();
+        Slots.cacheItems[this.oldPos] = this;
+    }
+
+    getKey() {
+        return `[${this.x},${this.y}]`;
+    }
+    getLeft() {
+        const leftItemId = `[${this.x - 1},${this.y}]`;
+        return Slots.cacheItems[leftItemId];
+    }
+    getRight() {
+        const rightItemId = `[${this.x + 1},${this.y}]`;
+        return Slots.cacheItems[rightItemId];
+    }
+    getTop() {
+        const topItemId = `[${this.x},${this.y - 1}]`;
+        return Slots.cacheItems[topItemId];
+    }
+    getBottom() {
+        const bottomItemId = `[${this.x},${this.y + 1}]`;
+        return Slots.cacheItems[bottomItemId];
+    }
+    static cacheItems = {}
+}
+
+class Point extends Slots {
+    draw(config) {
+        const { ctx, offset, zoom, width, height } = (config || {});
+
+        ctx.fillStyle = this.mousePos ? '#444' :  this.color;
+
+        /** Если включено движения по сетке, то делаем выравнивание. */
+        const pos = this.moveWithGrid ? Math.floor : (item) => item;
+
+        const x = pos(this.x) * zoom + offset.x * zoom + width / 2;
+        const y = pos(this.y) * zoom + offset.y * zoom + height / 2;
+        const w = this.w * zoom;
+        const h = this.h * zoom;
+        const l = !!this.getLeft();
+        const r = !!this.getRight();
+        const t = !!this.getTop();
+        const b = !!this.getBottom();
+
+        if (!(l || r || t || b)) {
+            ctx.fillRect(x + w / 4, y + h / 4, w / 2, h / 2);
+        }
+
+        if ( l || r) {
+            ctx.fillRect(x + w * (!l * 0.25), y + h * 0.25, w * (0.5 + r * 0.25 + l * 0.25), h * 0.5);
+        }
+        if (t || b) {
+            ctx.fillRect(x + w / 4, y + h * (!t * 0.25), w / 2, h * (0.5 + t * 0.25 + b * 0.25));
+        }
+        ctx.fill();
     }
 }

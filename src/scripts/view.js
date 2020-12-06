@@ -14,9 +14,12 @@ function run(event) {
         run: 'stop',
         stop: 'run'
     };
+    const caption = event.target.innerText;
+    if (caption === 'run') {}
 
-    event.target.classList.remove(`button-${event.target.innerText}`);
-    event.target.classList.add(`button-${changeCaptionTo[event.target.innerText]}`);
+    event.target.classList.remove(`button-${caption}`);
+    event.target.classList.add(`button-${changeCaptionTo[caption]}`);
 
-    event.target.innerText = changeCaptionTo[event.target.innerText];
+    event.target.innerText = changeCaptionTo[caption];
+    
 }
