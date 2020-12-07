@@ -19,8 +19,11 @@ class BaseObject {
         const x = pos(this.x) * zoom + offset.x * zoom + width / 2;
         const y = pos(this.y) * zoom + offset.y * zoom + height / 2;
 
-        ctx.fillStyle = this.mousePos ? '#444' :  this.color;
+        ctx.fillStyle = this.getColor();
         ctx.fillRect(x, y, this.w * zoom, this.h * zoom);
+    }
+    getColor() {
+        return this.mousePos ? '#444' : (this.isOn ? '#ff0' :this.color);
     }
 }
 
@@ -90,6 +93,7 @@ class Slots extends Movable {
     constructor(config) {
         super(config);
         this.oldPos = this.getKey();
+        this.isOn = false;
         Slots.cacheItems[this.oldPos] = this;
     }
 
@@ -118,14 +122,61 @@ class Slots extends Movable {
         const bottomItemId = `[${this.x},${this.y + 1}]`;
         return Slots.cacheItems[bottomItemId];
     }
-    static cacheItems = {}
+
+    neighborsDisable() {
+        if (!this.visited) {
+            this._setNeighborsStatus(false);
+            this.visited = true;
+        }
+    }
+    
+    neighborsEnable() {
+        if (!this.visited) {
+            this._setNeighborsStatus(true);
+            this.visited = true;
+        }
+    }
+
+    _setNeighborsStatus(status, key = 'setOn') {
+        if (this.getLeft()) {
+            this.getLeft()[key](status);
+        }
+        if (this.getRight()) {
+            this.getRight()[key](status);
+        }
+        if (this.getTop()) {
+            this.getTop()[key](status);
+        }
+        if (this.getBottom()) {
+            this.getBottom()[key](status);
+        }
+    }
+
+    setOn(status) {
+        if (this.isOn === status && !this.visited) {
+            this.visited = true;
+            this._setNeighborsStatus(status);
+        } else {
+            this.isOn = status;
+        }
+        this.visited = true;
+    }
+
+    dropVisits() {
+        if (this.visited) {
+            this.visited = false;
+            this._setNeighborsStatus(null, 'dropVisits');
+        }
+    }
+
+    static cacheItems = {};
 }
 
 class Point extends Slots {
     draw(config) {
         const { ctx, offset, zoom, width, height } = (config || {});
 
-        ctx.fillStyle = this.mousePos ? '#444' :  this.color;
+        ctx.fillStyle = ctx.fillStyle = this.getColor();
 
         /** Если включено движения по сетке, то делаем выравнивание. */
         const pos = this.moveWithGrid ? Math.floor : (item) => item;
@@ -149,5 +200,16 @@ class Point extends Slots {
         if (t || b) {
             ctx.fillRect(x + w / 4, y + h * (!t * 0.25), w / 2, h * (0.5 + t * 0.25 + b * 0.25));
         }
+    }
+}
+
+class EnergySource extends Slots {
+    constructor(config) {
+        super(config);
+        this.isOn = true;
+    }
+    setOn(status) {
+        this.isOn = true;
+        this.visited = true;
     }
 }

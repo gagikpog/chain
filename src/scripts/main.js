@@ -6,7 +6,9 @@ class Main {
         this.ctx = canvas.getContext('2d');
         this.grid = new Grid({ canvas, zoom: 35 });
         this.objects = [this.grid];
-        this.objects.push(...(new Array(10).fill(null).map((val, x) => new Point({x}))));
+        this.energySource = new EnergySource();
+        this.objects.push(this.energySource);
+        this.objects.push(...(new Array(10).fill(null).map((val, x) => new Point({x: x + 1}))));
         this.moveLoop = new MoveLoop({ canvas, objects: this.objects });
 
         this.windowResize = this.windowResize.bind(this);
@@ -81,6 +83,16 @@ class Main {
         this.timer = setInterval(() => {
             this.redraw();
         }, 16);
+    }
+    runSourceLoop() {
+        this.sourceTimer = setInterval(() => {
+            this.energySource.neighborsEnable();
+            this.energySource.dropVisits();
+        }, 80);
+    }
+    stopSourceLoop() {
+        clearInterval(this.sourceTimer);
+        this.objects.forEach((item)=> item.setOn && item.setOn(false));
     }
 
 }

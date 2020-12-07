@@ -25,7 +25,11 @@ function run(event) {
         stop: 'run'
     };
     const caption = event.target.innerText;
-    if (caption === 'run') {}
+    if (caption === 'run') {
+        main.runSourceLoop();
+    } else {
+        main.stopSourceLoop();
+    }
 
     event.target.classList.remove(`button-${caption}`);
     event.target.classList.add(`button-${changeCaptionTo[caption]}`);
