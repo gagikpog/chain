@@ -21,7 +21,6 @@ class BaseObject {
 
         ctx.fillStyle = this.mousePos ? '#444' :  this.color;
         ctx.fillRect(x, y, this.w * zoom, this.h * zoom);
-        ctx.fill();
     }
 }
 
@@ -150,6 +149,5 @@ class Point extends Slots {
         if (t || b) {
             ctx.fillRect(x + w / 4, y + h * (!t * 0.25), w / 2, h * (0.5 + t * 0.25 + b * 0.25));
         }
-        ctx.fill();
     }
 }

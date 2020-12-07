@@ -10,11 +10,8 @@ class Main {
         this.moveLoop = new MoveLoop({ canvas, objects: this.objects });
 
         this.windowResize = this.windowResize.bind(this);
-        this.redraw = this.redraw.bind(this);
 
         window.onresize = this.windowResize;
-        this.moveLoop.redraw = this.redraw;
-        this.grid.zoomChanged = this.redraw;
 
         this.windowResize();
 
@@ -23,6 +20,7 @@ class Main {
         canvas.onmouseout = this.mouseUp.bind(this);
         canvas.onmouseup = this.mouseUp.bind(this);
 
+        this.displayLoop();
     }
 
     windowResize() {
@@ -30,7 +28,6 @@ class Main {
         this.canvas.height = window.innerHeight;
         this.grid.h = this.canvas.height;
         this.grid.w = this.canvas.width;
-        this.redraw();
     }
 
     redraw() {
@@ -61,7 +58,6 @@ class Main {
                 const elemY = Math.floor(y);
                 if (!Slots.cacheItems[`[${elemX},${elemY}]`]) {
                     this.objects.push( new Point({x: elemX, y: elemY}));
-                    this.redraw();
                 }
                 break;
             default:
@@ -79,6 +75,12 @@ class Main {
     mouseUp(event) {
         event.stopPropagation();
         this.moveLoop.mouseUp(event);
+    }
+
+    displayLoop() {
+        this.timer = setInterval(() => {
+            this.redraw();
+        }, 16);
     }
 
 }

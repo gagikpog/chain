@@ -37,3 +37,10 @@ html, body {
 .button-stop + .button-edit {
     display: none;
 }
+
+#fps {
+    position: absolute;
+    right: 0;
+    top: 0;
+    padding: 10px;
+}
