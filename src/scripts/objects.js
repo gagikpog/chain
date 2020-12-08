@@ -25,6 +25,7 @@ class BaseObject {
     getColor() {
         return this.mousePos ? '#444' : (this.isOn ? '#ff0' :this.color);
     }
+    destroy() {}
 }
 
 class Movable extends BaseObject {
@@ -169,6 +170,14 @@ class Slots extends Movable {
         }
     }
 
+    getActions() {
+        return [];
+    }
+
+    destroy() {
+        delete Slots.cacheItems[this.oldPos];
+    }
+
     static cacheItems = {};
 }
 
@@ -200,6 +209,10 @@ class Point extends Slots {
         if (t || b) {
             ctx.fillRect(x + w / 4, y + h * (!t * 0.25), w / 2, h * (0.5 + t * 0.25 + b * 0.25));
         }
+    }
+
+    getActions() {
+        return ['remove'];
     }
 }
 

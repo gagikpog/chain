@@ -35,5 +35,4 @@ function run(event) {
     event.target.classList.add(`button-${changeCaptionTo[caption]}`);
 
     event.target.innerText = changeCaptionTo[caption];
-    
 }

@@ -8,7 +8,7 @@ class Main {
         this.objects = [this.grid];
         this.energySource = new EnergySource();
         this.objects.push(this.energySource);
-        this.objects.push(...(new Array(10).fill(null).map((val, x) => new Point({x: x + 1}))));
+        this.objects.push(...(new Array(10).fill(null).map((val, x) => new Point({ x: x + 1 }))));
         this.moveLoop = new MoveLoop({ canvas, objects: this.objects });
 
         this.windowResize = this.windowResize.bind(this);
@@ -49,7 +49,8 @@ class Main {
 
     mouseDown(event) {
         event.stopPropagation();
-
+        contextMenu.style.display = 'none';
+        this.editingItem = null;
         switch (event.button) {
             case 0:
                 this.moveLoop.mouseDown(event);
@@ -59,7 +60,23 @@ class Main {
                 const elemX = Math.floor(x);
                 const elemY = Math.floor(y);
                 if (!Slots.cacheItems[`[${elemX},${elemY}]`]) {
-                    this.objects.push( new Point({x: elemX, y: elemY}));
+                    this.objects.push(new Point({ x: elemX, y: elemY }));
+                }
+                break;
+            case 2:
+                const pos = this.moveLoop.toGlobalPos(event);
+                const item = Slots.cacheItems[`[${Math.floor(pos.x)},${Math.floor(pos.y)}]`];
+                if (item) {
+                    const actions = item.getActions();
+                    if (actions.length) {
+                        this.editingItem = item;
+                        contextMenu.classList.remove(...contextMenu.classList);
+                        contextMenu.classList.add('context-menu');
+                        contextMenu.classList.add(...actions.map((className) => `context-menu-${className}`));
+                        contextMenu.style.display = 'flex';
+                        contextMenu.style.top = event.clientY - 11 + 'px';
+                        contextMenu.style.left = event.clientX + 'px';
+                    }
                 }
                 break;
             default:
@@ -92,13 +109,49 @@ class Main {
     }
     stopSourceLoop() {
         clearInterval(this.sourceTimer);
-        this.objects.forEach((item)=> item.setOn && item.setOn(false));
+        this.objects.forEach((item) => item.setOn && item.setOn(false));
     }
 
+    contextElementActivated(event) {
+        contextMenu.style.display = 'none';
+        const action = event.target.id;
+        switch(action) {
+            case 'delete':
+                const itemId = this.objects.findIndex((item) => item === this.editingItem);
+                if (itemId > 0) {
+                    this.editingItem.destroy();
+                    this.objects.splice(itemId, 1);
+                }
+                break;
+            default:
+                if (this.editingItem && this.editingItem[action]) {
+                    this.editingItem[action]();
+                }
+                break;
+        }
+        
+    }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     const canvas = document.createElement('canvas');
     document.body.appendChild(canvas);
     window.main = new Main({ canvas });
+
+    window.contextMenu = document.querySelector('.context-menu');
+
+    contextMenu.addEventListener('click', (event) => {
+        main.contextElementActivated(event);
+    })
+
+    if (document.addEventListener) {
+        document.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+        }, false);
+    } else {
+        document.attachEvent('oncontextmenu', function () {
+            window.event.returnValue = false;
+        });
+    }
+
 });

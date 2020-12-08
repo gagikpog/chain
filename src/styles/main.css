@@ -44,3 +44,63 @@ html, body {
     top: 0;
     padding: 10px;
 }
+
+.context-menu {
+    position: absolute;
+    display: none;
+}
+
+.context-menu-button {
+    cursor: pointer;
+    padding: 4px;
+    border: 1px solid gray;
+    border-radius: 2px;
+    width: 16px;
+    height: 16px;
+    align-items: center;
+    justify-content: center;
+    display: none;
+    /* pointer-events: none; */
+}
+.context-menu-button.delete {
+    text-indent: -9999px;
+    background: url("/src/icons/delete.svg") no-repeat top left;
+    background-color: honeydew;
+    background-size: 16px 16px;
+    background-position: 4px;
+}
+
+
+.context-menu-button.rotate-right {
+    transform: scale(-1, 1);
+    text-indent: -9999px;
+    background: url("/src/icons/rotate.svg") no-repeat top left;
+    background-color: honeydew;
+    background-size: 16px 16px;
+    background-position: 4px;
+}
+
+.context-menu-button.rotate-left {
+    text-indent: -9999px;
+    background: url("/src/icons/rotate.svg") no-repeat top left;
+    background-color: honeydew;
+    background-size: 16px 16px;
+    background-position: 4px;
+}
+
+.context-menu-button:hover {
+    background-color: #c0ccc0;
+}
+
+
+.context-menu-remove .context-menu-button.delete {
+    display: block;
+}
+
+.context-menu-rotate-right .context-menu-button.rotate-right {
+    display: block;
+}
+
+.context-menu-rotate-left .context-menu-button.rotate-left {
+    display: block;
+}
