@@ -139,26 +139,30 @@ class Slots extends Movable {
     }
 
     _setNeighborsStatus(status, key = 'setOn') {
+        const args = [...arguments].slice(2);
         if (this.getLeft()) {
-            this.getLeft()[key](status);
+            this.getLeft()[key](status, ...args);
         }
         if (this.getRight()) {
-            this.getRight()[key](status);
+            this.getRight()[key](status, ...args);
         }
         if (this.getTop()) {
-            this.getTop()[key](status);
+            this.getTop()[key](status, ...args);
         }
         if (this.getBottom()) {
-            this.getBottom()[key](status);
+            this.getBottom()[key](status, ...args);
         }
     }
 
-    setOn(status) {
+    setOn(status, deep = 1) {
         if (this.isOn === status && !this.visited) {
             this.visited = true;
-            this._setNeighborsStatus(status);
+            this._setNeighborsStatus(status, 'setOn', deep + 1);
         } else {
             this.isOn = status;
+        }
+        if (this.isOn) {
+            this.deep = deep;
         }
         this.visited = true;
     }
@@ -176,6 +180,29 @@ class Slots extends Movable {
 
     destroy() {
         delete Slots.cacheItems[this.oldPos];
+    }
+
+    canBeOn() {
+        if (this.needDeleteDeep) {
+            delete this.deep;
+            delete this.needDeleteDeep;
+        }
+        if (this.deep >= 1) {
+            const beLifi = this.getLeft() && this.getLeft().deep < this.deep ||
+            this.getTop() &&this.getTop().deep < this.deep ||
+            this.getRight() && this.getRight().deep < this.deep ||
+            this.getBottom() && this.getBottom().deep < this.deep;
+
+            if(!beLifi) {
+                this.needDeleteDeep = true;
+                this.isOn = false;
+            }
+            
+        } else {
+            if (this.deep === undefined && this.isOn) {
+                this.isOn = false;
+            }
+        }
     }
 
     static cacheItems = {};
@@ -220,6 +247,7 @@ class EnergySource extends Slots {
     constructor(config) {
         super(config);
         this.isOn = true;
+        this.deep = 0;
     }
     setOn(status) {
         this.isOn = true;

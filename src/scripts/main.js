@@ -104,6 +104,7 @@ class Main {
     runSourceLoop() {
         this.sourceTimer = setInterval(() => {
             this.energySource.neighborsEnable();
+            this.objects.forEach((item) => item.canBeOn && item.canBeOn());
             this.energySource.dropVisits();
         }, 80);
     }
