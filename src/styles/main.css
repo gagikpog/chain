@@ -64,7 +64,7 @@ html, body {
 }
 .context-menu-button.delete {
     text-indent: -9999px;
-    background: url("/src/icons/delete.svg") no-repeat top left;
+    background: url("/chain/src/icons/delete.svg") no-repeat top left;
     background-color: honeydew;
     background-size: 16px 16px;
     background-position: 4px;
@@ -74,7 +74,7 @@ html, body {
 .context-menu-button.rotate-right {
     transform: scale(-1, 1);
     text-indent: -9999px;
-    background: url("/src/icons/rotate.svg") no-repeat top left;
+    background: url("/chain/src/icons/rotate.svg") no-repeat top left;
     background-color: honeydew;
     background-size: 16px 16px;
     background-position: 4px;
@@ -82,7 +82,7 @@ html, body {
 
 .context-menu-button.rotate-left {
     text-indent: -9999px;
-    background: url("/src/icons/rotate.svg") no-repeat top left;
+    background: url("/chain/src/icons/rotate.svg") no-repeat top left;
     background-color: honeydew;
     background-size: 16px 16px;
     background-position: 4px;
