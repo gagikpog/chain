@@ -93,35 +93,38 @@ class Slots extends Movable {
 
     constructor(config) {
         super(config);
-        this.oldPos = this.getKey();
+        this.oldPos = this._getKey();
         this.isOn = false;
         Slots.cacheItems[this.oldPos] = this;
     }
 
     updateItemCache() {
         delete Slots.cacheItems[this.oldPos];
-        this.oldPos = this.getKey();
+        this.oldPos = this._getKey();
         Slots.cacheItems[this.oldPos] = this;
     }
 
-    getKey() {
+    _getKey() {
         return `[${this.x},${this.y}]`;
     }
     getLeft() {
         const leftItemId = `[${this.x - 1},${this.y}]`;
-        return Slots.cacheItems[leftItemId];
+        return Slots.cacheItems[leftItemId] && Slots.cacheItems[leftItemId].getSlotItem('right', leftItemId);
     }
     getRight() {
         const rightItemId = `[${this.x + 1},${this.y}]`;
-        return Slots.cacheItems[rightItemId];
+        return Slots.cacheItems[rightItemId] && Slots.cacheItems[rightItemId].getSlotItem('left', rightItemId);
     }
     getTop() {
         const topItemId = `[${this.x},${this.y - 1}]`;
-        return Slots.cacheItems[topItemId];
+        return Slots.cacheItems[topItemId] && Slots.cacheItems[topItemId].getSlotItem('bottom', topItemId);
     }
     getBottom() {
         const bottomItemId = `[${this.x},${this.y + 1}]`;
-        return Slots.cacheItems[bottomItemId];
+        return Slots.cacheItems[bottomItemId] && Slots.cacheItems[bottomItemId].getSlotItem('top', bottomItemId);
+    }
+    getSlotItem(direction, position) {
+        return this;
     }
 
     neighborsDisable() {
@@ -188,12 +191,12 @@ class Slots extends Movable {
             delete this.needDeleteDeep;
         }
         if (this.deep >= 1) {
-            const beLifi = this.getLeft() && this.getLeft().deep < this.deep ||
+            const beLife = this.getLeft() && this.getLeft().deep < this.deep ||
             this.getTop() &&this.getTop().deep < this.deep ||
             this.getRight() && this.getRight().deep < this.deep ||
             this.getBottom() && this.getBottom().deep < this.deep;
 
-            if(!beLifi) {
+            if(!beLife) {
                 this.needDeleteDeep = true;
                 this.isOn = false;
             }

@@ -139,6 +139,8 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.appendChild(canvas);
     window.main = new Main({ canvas });
 
+    main.objects.push(new LogicAnd({x: 2, y: 2}))
+
     window.contextMenu = document.querySelector('.context-menu');
 
     contextMenu.addEventListener('click', (event) => {
