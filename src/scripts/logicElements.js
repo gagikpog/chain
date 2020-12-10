@@ -83,19 +83,32 @@ class LogicAnd extends Slots {
     }
 
     setOn(status, deep = 1) {
-        if (this.isOn === status && !this.visited) {
+        if (this.visited) {
+            return;
+        }
+        const top = this.getTop();
+        const bottom = this.getBottom();
+        const newStatus = top && top.isOn && bottom && bottom.isOn;
+        if (this.isOn === newStatus) {
             this.visited = true;
-            this._setNeighborsStatus(status, 'setOn', deep + 1);
+            this._setNeighborsStatus(newStatus, 'setOn', deep + 1);
         } else {
-            const top = this.getTop();
-            const bottom = this.getBottom();
-            this.isOn = top && top.isOn && bottom && bottom.isOn;
+            this.isOn = newStatus;
         }
         if (this.isOn) {
             this.deep = deep;
         }
         this.visited = true;
     }
+
+    _setNeighborsStatus(status, key = 'setOn') {
+        const args = [...arguments].slice(2);
+
+        if (this.getRight()) {
+            this.getRight()[key](status, ...args);
+        }
+    }
+
 
     destroy() {
         super.destroy();
